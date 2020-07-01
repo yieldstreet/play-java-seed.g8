@@ -1,4 +1,4 @@
 apiVersion: v1
-description: $name;format="Camel"$
+description: $name;format="start"$
 name: $name$
 version: 1.0.0

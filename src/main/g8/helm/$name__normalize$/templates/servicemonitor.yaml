@@ -1,0 +1,23 @@
+{{- if .Values.Deployment.PrometheusEnabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  jobLabel: {{ include "$name$.name" . }}
+  endpoints:
+    - port: prometheus
+      path: /
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "$name$.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

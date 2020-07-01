@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  type: {{ .Values.Deployment.ServiceType }}
+  {{- if .Values.Deployment.ServiceType | eq "ClusterIP" }}
+  clusterIP: None
+  {{- end }}
+  {{- if .Values.Deployment.ServiceType | eq "ExternalName" }}
+  externalName: {{ .Values.Deployment.ExternalServiceName }}
+  {{- end }}
+  ports:
+    - name: http
+      {{- if .Values.Deployment.ServiceType | eq "ExternalName" }}
+      port: {{ .Values.Deployment.ExternalServicePort }}
+      {{- else }}
+      port: 9000
+      {{- end }}
+    {{- if .Values.Deployment.PrometheusEnabled }}
+    - name: prometheus
+      port: 9095
+    {{- end }}
+  selector:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

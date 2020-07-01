@@ -1,33 +1,11 @@
 # play-java-seed.g8
 
-[![Build Status](https://travis-ci.com/playframework/play-java-seed.g8.svg?branch=2.8.x)](https://travis-ci.com/playframework/play-java-seed.g8)
+Giter8 template for generating a Yieldstreet Play project in Java.
 
-Giter8 template for generating a Play project in Java.
+It's a fork of Play's [play-java-seed.g8](https://github.com/playframework/play-java-seed.g8) with a number of additions relevant for our organization, namely:
 
-This project is intended for people who know how to use Play and want to get started right away.
-
-You should only need to clone this project if you are modifying the giter8 template.  For information on giter8 templates, please see <http://www.foundweekends.org/giter8/>.
-
-## Running
-
-If you want to create a project:
-
-```bash
-sbt new playframework/play-java-seed.g8
-```
-
-## Scaffolding
-
-Type `g8Scaffold form` from sbt to create the scaffold controller, template and tests needed to process a form.
-
-You can also create your own giter8 seeds and scaffolds based off this one by forking from the <https://github.com/playframework/play-java-seed.g8> or <https://github.com/playframework/play-scala-seed.g8> github projects.
-
-## Running locally
-
-If you are testing this giter8 template locally, you should [install g8](http://www.foundweekends.org/giter8/setup.html) and then run the [local test](http://www.foundweekends.org/giter8/testing.html) feature:
-
-```bash
-g8 file://play-java-seed.g8/ --name=my-seed-test --force
-```
-
-Will create an example template called `my-seed-test`, for example.
+* Use `YieldstreetPlayPlugin` instead of `PlayJava`. The latter includes HTML templates and other features that we won't need. `YieldstreetPlayPlugin` is based on `PlayService` and `RoutesCompiler`, providing a leaner base more appropriate for micro-services.
+* Add [sbt-protoc](https://github.com/thesamet/sbt-protoc) plugin to compile protocol buffers.
+* Add [sbt-dotenv](https://github.com/mefellows/sbt-dotenv) plugin to read environment variables from `.env`.
+* Add Lagom's JDBC persistence module. Lagom is a fantastic solution for event-based, CQRS enabled systems like what we're trying to do. Unfortunately, Lagom's service interface is clunky and hides too much of the HTTP protocol. Through some experimentation, we've arrived at a hybrid solution based on Play instead of Lagom, but pulling in Lagom's persistence module for CQRS. This requires some additional configuration, all provided in this template.
+* Define separate API and implementation projects. The API project should contain classes shared with clients, like protocol buffers and other model classes.

@@ -1,0 +1,20 @@
+<configuration>
+  <appender name="STDOUT" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+    <appender class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+  </appender>
+
+  <!-- application loggers -->
+  <logger name="application" level="DEBUG"/>
+  <logger name="yieldstreet" level="DEBUG"/>
+
+  <!-- framework loggers -->
+  <logger name="play" level="INFO"/>
+  <logger name="akka" level="INFO"/>
+  <logger name="kamon" level="INFO"/>
+
+  <root level="WARN">
+    <appender-ref ref="STDOUT"/>
+  </root>
+</configuration>

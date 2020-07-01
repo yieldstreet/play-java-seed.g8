@@ -1,0 +1,23 @@
+Deployment:
+  Replicas: 1
+  ImageTag: latest
+  ImagePullPolicy: Always
+  ServiceType: ClusterIP
+  IngressClass: "internal"
+  PrometheusEnabled: true
+  IngressDefaultTls: false
+  CreateServiceAccount: false
+  ExternalServiceName: host.docker.internal
+  ExternalServicePort: 9000
+  Resources:
+    limits:
+      memory: 1Gi
+    requests:
+      cpu: 200m
+PublicEnvVars:
+  ENV:
+  DB_URL:
+  DB_USERNAME:
+SecretEnvVars:
+  PLAY_HTTP_SECRET_KEY:
+  DB_PASSWORD:

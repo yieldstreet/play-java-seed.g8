@@ -1,0 +1,12 @@
+Deployment:
+  ImagePullPolicy: IfNotPresent
+  IngressClass: ""
+  IngressDefaultTls: true
+  CreateServiceAccount: true
+PublicEnvVars:
+  ENV: dev
+  DB_URL: jdbc:mysql://dev-stack-mysql/$name$?sslMode=DISABLED
+  DB_USERNAME: root
+SecretEnvVars:
+  PLAY_HTTP_SECRET_KEY: play-http-secret-key
+  DB_PASSWORD: yieldstreet

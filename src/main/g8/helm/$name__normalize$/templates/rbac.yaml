@@ -1,0 +1,42 @@
+{{- if .Values.Deployment.CreateServiceAccount | and (not (eq .Values.Deployment.ServiceType "ExternalName")) }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: Role
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+rules:
+  - apiGroups: [ "" ]
+    resources: [ "pods" ]
+    verbs: [ "get", "list", "watch" ]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "$name$.fullname" .}}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "$name$.fullname" . }}
+{{- end }}

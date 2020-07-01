@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    sidecar.jaegertracing.io/inject: "true"
+spec:
+  replicas: {{ .Values.Deployment.Replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "$name$.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "$name$.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        traffic.sidecar.istio.io/excludeInboundPorts: "8558,9095,25520"
+        traffic.sidecar.istio.io/excludeOutboundPorts: "8558,25520"
+    spec:
+      serviceAccountName: {{ include "$name$.fullname" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "283519872463.dkr.ecr.us-east-2.amazonaws.com/$name$:{{ .Values.Deployment.ImageTag }}"
+          imagePullPolicy: {{ .Values.Deployment.ImagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+            - name: prometheus
+              containerPort: 9095
+              protocol: TCP
+            - name: akka-management
+              containerPort: 8558
+              protocol: TCP
+            - name: akka-remote
+              containerPort: 25520
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: akka-management
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: akka-management
+          resources:
+            {{- toYaml .Values.Deployment.Resources | nindent 12 }}
+          env:
+            - name: JAVA_OPTS
+              value: >-
+                -Dakka.discovery.kubernetes-api.pod-label-selector=app.kubernetes.io/name={{ include "$name$.name" . }},app.kubernetes.io/instance={{ .Release.Name }}
+                -Dakka.management.cluster.bootstrap.contact-point-discovery.required-contact-point-nr={{ .Values.Deployment.Replicas }}
+                -Dakka.management.http.bind-hostname=0.0.0.0
+                -Dpidfile.path=/dev/null
+          envFrom:
+            - configMapRef:
+                name: {{ include "$name$.fullname" . }}
+            - secretRef:
+                name: {{ include "$name$.fullname" . }}

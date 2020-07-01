@@ -1,0 +1,32 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "$name$.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "$name$.name" . }}
+    helm.sh/chart: {{ include "$name$.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{- if .Values.Deployment.IngressClass }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.Deployment.IngressClass | quote }}
+  {{- end }}
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/api/$name$/`)
+      priority: 100
+      services:
+        - kind: Service
+          name: {{ include "$name$.fullname" .}}
+          {{- if .Values.Deployment.ServiceType | eq "ExternalName" }}
+          port: {{ .Values.Deployment.ExternalServicePort }}
+          {{- else }}
+          port: 9000
+  {{- end }}
+  {{- if .Values.Deployment.IngressDefaultTls }}
+  tls: {}
+  {{- end }}
